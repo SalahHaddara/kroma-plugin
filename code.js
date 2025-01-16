@@ -1622,3 +1622,70 @@ async function updateIconsSection(section, iconTokens) {
     }
   }
 }
+
+async function createQuoteSection() {
+  // Load required fonts first
+  await Promise.all([
+    figma.loadFontAsync({ family: "Inter", style: "Regular" }),
+    figma.loadFontAsync({ family: "Inter", style: "Medium" }),
+    figma.loadFontAsync({ family: "Inter", style: "Semi Bold" }),
+    figma.loadFontAsync({ family: "Inter", style: "Bold" }),
+  ]).catch((error) => {
+    console.error("Error loading fonts:", error);
+    throw new Error("Failed to load required fonts");
+  });
+
+  const section = figma.createFrame();
+  section.name = "Quotes";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 16; // Reduced from 32
+  section.fills = [];
+
+  // Create title
+  const title = figma.createText();
+  title.characters = "Quotes";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  // Create quote container
+  const quoteFrame = figma.createFrame();
+  quoteFrame.name = "Quote";
+  quoteFrame.layoutMode = "VERTICAL";
+  quoteFrame.itemSpacing = 8; // Reduced from 16
+  quoteFrame.paddingLeft = 16; // Reduced from 24
+  quoteFrame.paddingRight = 16; // Reduced from 24
+  quoteFrame.paddingTop = 16; // Reduced from 24
+  quoteFrame.paddingBottom = 16; // Reduced from 24
+  quoteFrame.fills = [{ type: "SOLID", color: { r: 0.98, g: 0.98, b: 0.98 } }];
+  quoteFrame.cornerRadius = 6; // Reduced from 8
+  quoteFrame.resize(320, 140); // Reduced from 600x200
+
+  // Create quote symbol
+  const quoteSymbol = figma.createText();
+  quoteSymbol.characters = '"';
+  quoteSymbol.fontSize = 32; // Reduced from 48
+  quoteSymbol.fontName = { family: "Inter", style: "Bold" };
+  quoteSymbol.fills = [{ type: "SOLID", color: { r: 0.9, g: 0.9, b: 0.9 } }];
+
+  // Create quote text
+  const quoteText = figma.createText();
+  quoteText.characters = "Insert your inspirational quote here."; // Shortened text
+  quoteText.fontSize = 14; // Reduced from 20
+  quoteText.fontName = { family: "Inter", style: "Regular" };
+  quoteText.fills = [{ type: "SOLID", color: { r: 0.2, g: 0.2, b: 0.2 } }];
+
+  // Create author text
+  const authorText = figma.createText();
+  authorText.characters = "— Author Name";
+  authorText.fontSize = 12; // Reduced from 14
+  authorText.fontName = { family: "Inter", style: "Medium" };
+  authorText.fills = [{ type: "SOLID", color: { r: 0.4, g: 0.4, b: 0.4 } }];
+
+  quoteFrame.appendChild(quoteSymbol);
+  quoteFrame.appendChild(quoteText);
+  quoteFrame.appendChild(authorText);
+  section.appendChild(quoteFrame);
+
+  return section;
+}
