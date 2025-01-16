@@ -1844,3 +1844,76 @@ async function createInspirationSection() {
   section.appendChild(smallImagesContainer);
   return section;
 }
+
+async function updateInspirationSection(section, imageTokens) {
+  if (!section || !imageTokens) return;
+
+  try {
+    // Update main image
+    const mainImage = section.findOne((node) => node.name === "Main Image");
+    if (mainImage && imageTokens.mainImage) {
+      const imageData = imageTokens.mainImage;
+      if (imageData.imageData) {
+        const imageBytes = figma.base64Decode(
+          imageData.imageData.split(",")[1],
+        );
+        const imageHash = await figma.createImage(imageBytes).hash;
+        mainImage.fills = [
+          {
+            type: "IMAGE",
+            scaleMode: "FILL",
+            imageHash: imageHash,
+          },
+        ];
+      }
+    }
+
+    // Update smaller images - with exact matching
+    const smallImage1Frame = section.findOne(
+      (node) => node.name === "Small Image 1",
+    );
+    const smallImage2Frame = section.findOne(
+      (node) => node.name === "Small Image 2",
+    );
+
+    // Update small image 1
+    if (
+      smallImage1Frame &&
+      imageTokens.smallImage1 &&
+      imageTokens.smallImage1.imageData
+    ) {
+      const imageBytes1 = figma.base64Decode(
+        imageTokens.smallImage1.imageData.split(",")[1],
+      );
+      const imageHash1 = await figma.createImage(imageBytes1).hash;
+      smallImage1Frame.fills = [
+        {
+          type: "IMAGE",
+          scaleMode: "FILL",
+          imageHash: imageHash1,
+        },
+      ];
+    }
+
+    // Update small image 2
+    if (
+      smallImage2Frame &&
+      imageTokens.smallImage2 &&
+      imageTokens.smallImage2.imageData
+    ) {
+      const imageBytes2 = figma.base64Decode(
+        imageTokens.smallImage2.imageData.split(",")[1],
+      );
+      const imageHash2 = await figma.createImage(imageBytes2).hash;
+      smallImage2Frame.fills = [
+        {
+          type: "IMAGE",
+          scaleMode: "FILL",
+          imageHash: imageHash2,
+        },
+      ];
+    }
+  } catch (error) {
+    console.error("Error updating inspiration images:", error);
+  }
+}
