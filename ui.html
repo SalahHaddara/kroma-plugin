@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+      body {
+          font-family: Inter, sans-serif;
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgb(15 23 42);
+          color: white;
+      }
+
+      .container {
+          width: 300px;
+          padding: 20px;
+      }
+
+      .screen {
+          display: none;
+      }
+
+      .screen.active {
+          display: block;
+      }
+
+      button {
+          width: 100%;
+          padding: 8px 16px;
+          border-radius: 8px;
+          border: none;
+          font-size: 14px;
+          font-weight: 500;
+          margin-bottom: 12px;
+          cursor: pointer;
+      }
+
+      .primary-button {
+          background: linear-gradient(to right, rgb(16 185 129), rgb(236 72 153));
+          color: white;
+      }
+
+      .primary-button:hover {
+          opacity: 0.9;
+      }
+
+      .secondary-button {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+      }
+
+      .secondary-button:hover {
+          background: rgba(255, 255, 255, 0.2);
+      }
+
+      button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+      }
+
+      h2 {
+          font-size: 24px;
+          margin: 0 0 8px;
+          background: linear-gradient(to right, rgb(16 185 129), rgb(236 72 153));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+
+      .subtitle {
+          font-size: 14px;
+          margin-bottom: 24px;
+          opacity: 0.7;
+      }
+
+      .message {
+          font-size: 14px;
+          text-align: center;
+          opacity: 0.7;
+      }
+
+      .user-info {
+          padding: 12px;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          font-size: 14px;
+          background: rgba(255, 255, 255, 0.1);
+      }
+  </style>
+</head>
+
+</html>
