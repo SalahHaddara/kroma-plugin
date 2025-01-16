@@ -192,7 +192,41 @@
     }
   };
 
+  onmessage = (event) => {
+    const { type } = event.data.pluginMessage;
+    const button = document.getElementById('generateDesign');
 
+    switch (type) {
+      case 'step-1-complete':
+        fetch(`${WEBSITE_URL}/get-design/latest-tokens`, {
+          headers: { 'Authorization': `Bearer ${authToken}` },
+        })
+          .then(response => {
+            if (!response.ok) {
+              if (response.status === 401) {
+                showScreen('loginScreen');
+                throw new Error('Please log in again');
+              }
+              throw new Error(`Server error: ${response.status}`);
+            }
+
+            return response.json();
+          })
+          .then(tokens => {
+            parent.postMessage({
+              pluginMessage: { type: 'apply-design-tokens', tokens },
+            }, '*');
+          })
+          .catch(error => {
+            console.error('Token fetch failed:', error);
+            button.disabled = false;
+            button.textContent = 'Generate Design System';
+          });
+        break;
+
+
+    }
+  };
 </script>
 </body>
 </html>
