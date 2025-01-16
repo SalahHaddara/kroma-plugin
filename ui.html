@@ -139,6 +139,26 @@
     }
   };
 
+  document.getElementById('loginButton').onclick = () => {
+    window.open(`http://localhost:5173/login?redirect=/figma-confirmation&sessionKey=${sessionKey}`, 'Login', 'width=500,height=700');
+
+    const checkInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`${WEBSITE_URL}/auth/check-plugin-login?sessionKey=${sessionKey}`);
+        const data = await response.json();
+
+        if (data.authenticated) {
+          clearInterval(checkInterval);
+          authToken = data.token;
+          document.getElementById('userInfo').textContent = `Connected as ${data.user.email}`;
+          showScreen('mainScreen');
+        }
+      } catch (error) {
+        console.error('Login check failed:', error);
+      }
+    }, 1000);
+  };
+
 
 </script>
 </body>
