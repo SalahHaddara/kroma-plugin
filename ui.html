@@ -159,6 +159,20 @@
     }, 1000);
   };
 
+  document.getElementById('logout').onclick = async () => {
+    try {
+      await fetch(`${WEBSITE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+      authToken = null;
+      showScreen('loginScreen');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
 
 </script>
 </body>
