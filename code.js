@@ -1013,3 +1013,50 @@ function createButtonsSection() {
 
   return section;
 }
+
+function createTypographySection() {
+  const section = figma.createFrame();
+  section.name = "Typography System";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 32;
+  section.fills = [];
+
+  const title = figma.createText();
+  title.characters = "Typography System";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  const styles = [
+    { text: "This is H1", size: 60, style: "Semi Bold" },
+    { text: "This is H2", size: 48, style: "Semi Bold" },
+    { text: "This is H3", size: 40, style: "Semi Bold" },
+    { text: "This is Paragraph", size: 20, style: "Regular" },
+    { text: "THIS IS CAPTION", size: 16, style: "Regular" },
+  ];
+
+  styles.forEach((style) => {
+    const row = figma.createFrame();
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 24;
+    row.fills = [];
+    row.resize(470, 90);
+    row.layoutMode = "HORIZONTAL";
+
+    const sample = figma.createText();
+    sample.characters = style.text;
+    sample.fontSize = style.size;
+    sample.fontName = { family: "Inter", style: style.style };
+
+    const details = figma.createText();
+    details.characters = `Inter Typeface\nSize: ${style.size}px`;
+    details.fontSize = 14;
+    details.fills = [{ type: "SOLID", color: { r: 0.4, g: 0.4, b: 0.4 } }];
+
+    row.appendChild(sample);
+    row.appendChild(details);
+    section.appendChild(row);
+  });
+
+  return section;
+}
