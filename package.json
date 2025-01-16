@@ -1,0 +1,36 @@
+{
+  "name": "figma-design-system-generator",
+  "version": "1.0.0",
+  "description": "Design System Generator for Figma",
+  "main": "dist/code.js",
+  "scripts": {
+    "build": "npm run build:plugin && npm run build:ui",
+    "build:plugin": "tsc -p tsconfig.json",
+    "build:ui": "esbuild src/ui/index.tsx --bundle --outfile=dist/ui.js --platform=browser",
+    "dev": "concurrently \"npm run build:plugin -- --watch\" \"npm run build:ui -- --watch\"",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@figma/plugin-typings": "^1.106.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.19.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
