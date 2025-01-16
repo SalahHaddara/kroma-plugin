@@ -237,7 +237,12 @@
               'Authorization': `Bearer ${authToken}`,
             },
             body: formData,
-          });
+          })
+            .then(() => {
+              button.disabled = false;
+              button.textContent = 'Generate Design System';
+            })
+            .catch(error => console.error('Error saving design:', error));
         }
         break;
     }
