@@ -571,3 +571,143 @@ async function updateTypography(section, typography, fontInfo) {
     throw error;
   }
 }
+
+async function updateButtons(section, buttonStyles, fontInfo) {
+  const buttonFrames = section.findAll(
+    (node) => node.type === "FRAME" && node.name.startsWith("Button "),
+  );
+
+  for (const frame of buttonFrames) {
+    try {
+      // Extract button number from frame name
+      const buttonNumber = parseInt(frame.name.replace("Button ", ""));
+      const styleKey = `button${buttonNumber}`;
+      const style = buttonStyles[styleKey];
+
+      if (!style) {
+        console.warn(`No style found for ${frame.name}`);
+        continue;
+      }
+
+      const button = frame.findOne(
+        (node) =>
+          node.type === "FRAME" && node.name === `Button ${buttonNumber}`,
+      );
+
+      if (!button) {
+        console.warn(`Button not found in ${frame.name}`);
+        continue;
+      }
+
+      // Update button styles
+      button.fills = [
+        {
+          type: "SOLID",
+          color: validateAndConvertColor(style.background),
+        },
+      ];
+
+      // Update border if specified
+      if (style.border) {
+        button.strokes = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(style.border),
+          },
+        ];
+        button.strokeWeight = 1.5;
+      } else {
+        button.strokes = [];
+      }
+
+      // Update border radius
+      button.cornerRadius = parseInt(style.borderRadius);
+
+      // Update padding
+      button.paddingLeft = parseInt(style.paddingX);
+      button.paddingRight = parseInt(style.paddingX);
+      button.paddingTop = parseInt(style.paddingY);
+      button.paddingBottom = parseInt(style.paddingY);
+
+      // Update text node
+      const textNode = button.findOne((node) => node.type === "TEXT");
+      if (textNode) {
+        // Update text color
+        textNode.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(style.text),
+          },
+        ];
+
+        // Update font size
+        textNode.fontSize = parseInt(style.fontSize);
+
+        let letterSpacingValue = 0;
+        if (style.letterSpacing !== "normal") {
+          letterSpacingValue =
+            parseFloat(style.letterSpacing.replace("px", "")) || 0;
+        }
+        textNode.letterSpacing = {
+          value: letterSpacingValue,
+          unit: "PIXELS",
+        };
+
+        const fontFamily = fontInfo ? fontInfo.family : "Inter";
+        const weightStyle = findBestStyleMatch(parseInt(style.fontWeight), [
+          "Regular",
+          "Medium",
+          "Semi Bold",
+          "Bold",
+        ]);
+
+        // Ensure font is loaded before setting it
+        try {
+          await figma.loadFontAsync({
+            family: fontFamily,
+            style: weightStyle,
+          });
+
+          textNode.fontName = {
+            family: fontFamily,
+            style: weightStyle,
+          };
+        } catch (fontError) {
+          console.warn(
+            `Failed to load font ${fontFamily} ${weightStyle}, falling back to Inter:`,
+            fontError,
+          );
+          // Fallback to Inter if the specified font fails to load
+          await figma.loadFontAsync({
+            family: "Inter",
+            style: weightStyle,
+          });
+          textNode.fontName = {
+            family: "Inter",
+            style: weightStyle,
+          };
+        }
+
+        // Update text transform
+        let text = `Button ${buttonNumber}`;
+        if (style.textTransform === "uppercase") {
+          text = text.toUpperCase();
+        } else if (style.textTransform === "capitalize") {
+          text = text
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        }
+        textNode.characters = text;
+      }
+
+      // Resize the button frame to accommodate the new styles
+      const newHeight =
+        parseInt(style.paddingY) * 2 + parseInt(style.fontSize) + 8;
+      button.resize(button.width, newHeight);
+      frame.resize(frame.width, newHeight);
+    } catch (error) {
+      console.error(`Error updating ${frame.name}:`, error);
+    }
+  }
+}
