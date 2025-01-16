@@ -315,3 +315,134 @@ async function updateColorPalette(section, colors) {
     console.error("Error in updateColorPalette:", error);
   }
 }
+
+async function updateDesignTokens(tokens) {
+  if (!tokens) {
+    throw new Error("No tokens provided");
+  }
+
+  try {
+    const designSystemFrame = figma.currentPage.findOne(
+      (node) => node.type === "FRAME" && node.name === "Design System",
+    );
+
+    if (!designSystemFrame) {
+      throw new Error(
+        "Design system frame not found. Please create the design system first.",
+      );
+    }
+
+    console.log("Found Design System frame:", designSystemFrame.id);
+
+    const fontFamily =
+      tokens.typography && tokens.typography.fontFamily
+        ? tokens.typography.fontFamily
+        : "Inter";
+    console.log("Loading fonts for:", fontFamily);
+    const fontInfo = await loadFonts(fontFamily);
+
+    const sections = [
+      {
+        name: "Color Palette",
+        handler: async (section) => {
+          if (tokens.colors) {
+            console.log("Updating color palette with:", tokens.colors);
+            await updateColorPalette(section, tokens.colors);
+          }
+        },
+      },
+      {
+        name: "Typography System",
+        handler: async (section) => {
+          if (tokens.typography) {
+            console.log("Updating typography with:", tokens.typography);
+            await updateTypography(section, tokens.typography, fontInfo);
+          }
+        },
+      },
+      {
+        name: "Buttons",
+        handler: async (section) => {
+          if (tokens.buttons) {
+            console.log("Updating buttons with:", tokens.buttons);
+            await updateButtons(section, tokens.buttons, fontInfo);
+          }
+        },
+      },
+      {
+        name: "Spacing System",
+        handler: async (section) => {
+          if (tokens.spacing) {
+            console.log("Updating spacing with:", tokens.spacing);
+            await updateSpacingSection(section, tokens.spacing);
+          }
+        },
+      },
+      {
+        name: "Icons",
+        handler: async (section) => {
+          if (tokens.icons) {
+            console.log("Updating icons with:", tokens.icons);
+            await updateIconsSection(section, tokens.icons);
+          }
+        },
+      },
+      {
+        name: "Quotes",
+        handler: async (section) => {
+          if (tokens.quote) {
+            console.log("Updating quote with:", tokens.quote);
+            await updateQuoteSection(section, tokens.quote);
+          }
+        },
+      },
+      {
+        name: "Alerts and Notifications",
+        handler: async (section) => {
+          if (tokens.alerts) {
+            console.log("Updating alerts with:", tokens.alerts);
+            await updateAlerts(section, tokens.alerts);
+          }
+        },
+      },
+      {
+        name: "Inspiration Images",
+        handler: async (section) => {
+          if (tokens.inspirationImages) {
+            console.log(
+              "Updating inspiration images with:",
+              tokens.inspirationImages,
+            );
+            await updateInspirationSection(section, tokens.inspirationImages);
+          }
+        },
+      },
+    ];
+
+    for (const { name, handler } of sections) {
+      console.log(`Looking for section: ${name}`);
+      const section = designSystemFrame.findOne((node) => node.name === name);
+
+      if (section) {
+        console.log(`Found section ${name}, updating...`);
+        await handler(section);
+        // Force a repaint of the section
+        section.resize(section.width, section.height);
+      } else {
+        console.warn(`Section ${name} not found`);
+      }
+    }
+
+    // Force a repaint of the entire frame
+    designSystemFrame.resize(designSystemFrame.width, designSystemFrame.height);
+
+    // Ensure changes are visible
+    figma.viewport.scrollAndZoomIntoView([designSystemFrame]);
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await exportFrameToPNG(designSystemFrame);
+  } catch (error) {
+    console.error("Error in updateDesignTokens:", error);
+    throw error;
+  }
+}
