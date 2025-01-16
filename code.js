@@ -183,3 +183,28 @@ async function getAvailableFontStyles(fontFamily) {
     return [];
   }
 }
+
+function findBestStyleMatch(targetWeight, availableStyles) {
+  const primaryOptions = fontWeightMap[targetWeight] || [];
+  for (const option of primaryOptions) {
+    if (availableStyles.includes(option)) {
+      return option;
+    }
+  }
+
+  const allWeights = Object.keys(fontWeightMap).map(Number);
+  const closestWeight = allWeights.reduce((prev, curr) => {
+    return Math.abs(curr - targetWeight) < Math.abs(prev - targetWeight)
+      ? curr
+      : prev;
+  });
+
+  const backupOptions = fontWeightMap[closestWeight] || [];
+  for (const option of backupOptions) {
+    if (availableStyles.includes(option)) {
+      return option;
+    }
+  }
+
+  return availableStyles.includes("Regular") ? "Regular" : availableStyles[0];
+}
