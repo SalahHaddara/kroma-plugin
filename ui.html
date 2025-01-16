@@ -116,6 +116,29 @@
     document.getElementById(screenId).classList.add('active');
   }
 
+  window.onload = async () => {
+    try {
+      const response = await fetch(`${WEBSITE_URL}/auth/plugin-session`, {
+        credentials: 'omit',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          authToken = data.token;
+          document.getElementById('userInfo').textContent = `Connected as ${data.user.email}`;
+          showScreen('mainScreen');
+          return;
+        }
+      }
+      showScreen('loginScreen');
+    } catch (error) {
+      console.error('Session check failed:', error);
+      showScreen('loginScreen');
+    }
+  };
+
 
 </script>
 </body>
