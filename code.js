@@ -894,3 +894,122 @@ function createColorPaletteSection() {
 
   return section;
 }
+
+function createButtonsSection() {
+  const section = figma.createFrame();
+  section.name = "Buttons";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 32;
+  section.fills = [];
+
+  const title = figma.createText();
+  title.characters = "Buttons";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  const createButton = (config, index) => {
+    const row = figma.createFrame();
+    row.name = `Button ${index + 1}`;
+    row.resize(
+      row.height,
+      parseInt(config.paddingY) * 2 + parseInt(config.fontSize) + 8,
+    );
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 16;
+    row.fills = [];
+
+    // Create button
+    const button = figma.createFrame();
+    button.resize(
+      button.width,
+      parseInt(config.paddingY) * 2 + parseInt(config.fontSize) + 8,
+    );
+    button.name = `Button ${index + 1}`;
+    button.layoutMode = "HORIZONTAL";
+
+    // Set background
+    button.fills = [
+      { type: "SOLID", color: validateAndConvertColor(config.background) },
+    ];
+
+    // Set border if exists
+    if (config.border) {
+      button.strokes = [
+        { type: "SOLID", color: validateAndConvertColor(config.border) },
+      ];
+      button.strokeWeight = 1.5;
+    }
+
+    // Set padding
+    button.paddingLeft = parseInt(config.paddingX);
+    button.paddingRight = parseInt(config.paddingX);
+    button.paddingTop = parseInt(config.paddingY);
+    button.paddingBottom = parseInt(config.paddingY);
+
+    // Set border radius
+    button.cornerRadius = parseInt(config.borderRadius);
+
+    // Alignment
+    button.primaryAxisAlignItems = "CENTER";
+    button.counterAxisAlignItems = "CENTER";
+
+    // Create text
+    const text = figma.createText();
+    text.characters = `Button ${index + 1}`;
+    text.fills = [
+      { type: "SOLID", color: validateAndConvertColor(config.text) },
+    ];
+
+    // Set font size
+    text.fontSize = parseInt(config.fontSize);
+
+    // Set font weight using the helper function
+    const weightStyle = findBestStyleMatch(parseInt(config.fontWeight), [
+      "Regular",
+      "Medium",
+      "Semi Bold",
+      "Bold",
+    ]);
+    text.fontName = { family: "Inter", style: weightStyle };
+
+    // Set letter spacing
+    text.letterSpacing = {
+      value: parseFloat(config.letterSpacing),
+      unit: "PIXELS",
+    };
+
+    // Set text transform
+    if (config.textTransform === "uppercase") {
+      text.characters = text.characters.toUpperCase();
+    } else if (config.textTransform === "capitalize") {
+      text.characters = text.characters
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+
+    button.appendChild(text);
+    row.appendChild(button);
+    return row;
+  };
+
+  // Create default buttons (will be updated later)
+  for (let i = 0; i < 6; i++) {
+    const defaultConfig = {
+      background: "#0EA5E9",
+      text: "#FFFFFF",
+      borderRadius: "12px",
+      paddingX: "24px",
+      paddingY: "14px",
+      fontSize: "16px",
+      fontWeight: "600",
+      letterSpacing: "0.5px",
+      textTransform: "none",
+    };
+    const button = createButton(defaultConfig, i);
+    section.appendChild(button);
+  }
+
+  return section;
+}
