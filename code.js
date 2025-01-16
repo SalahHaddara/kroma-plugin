@@ -1298,3 +1298,177 @@ function createAlertsSection() {
 
   return section;
 }
+
+async function updateAlerts(section, alertsConfig) {
+  const alertFrames = section.findAll(
+    (node) => node.type === "FRAME" && node.name.startsWith("Alert "),
+  );
+
+  for (const frame of alertFrames) {
+    try {
+      // Extract alert number from frame name
+      const alertNumber = parseInt(frame.name.replace("Alert ", ""));
+      const styleKey = `alert${alertNumber}`;
+      const style = alertsConfig[styleKey];
+
+      if (!style) {
+        console.warn(`No style found for ${frame.name}`);
+        continue;
+      }
+
+      // Update main frame styles
+      frame.fills = [
+        {
+          type: "SOLID",
+          color: validateAndConvertColor(style.background),
+        },
+      ];
+      frame.cornerRadius = parseInt(style.borderRadius);
+      frame.paddingTop = parseInt(style.paddingY);
+      frame.paddingBottom = parseInt(style.paddingY);
+      frame.paddingLeft = parseInt(style.paddingX);
+      frame.paddingRight = parseInt(style.paddingX);
+
+      // Update border rectangle
+      const border = frame.findOne((node) => node.type === "RECTANGLE");
+      if (border) {
+        border.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(style.border),
+          },
+        ];
+        const borderWidth = parseInt(style.borderWidth);
+        border.resize(borderWidth, border.height);
+        border.cornerRadius = borderWidth / 2;
+      }
+
+      // Get content container
+      const content = frame.findOne(
+        (node) => node.type === "FRAME" && node.name === "Content",
+      );
+
+      if (content) {
+        // Update title
+        const titleNode = content.findChild(
+          (node) =>
+            node.type === "TEXT" &&
+            (node.characters.includes("Notification") ||
+              node.characters.includes("Success") ||
+              node.characters.includes("Error") ||
+              node.characters.includes("Warning") ||
+              node.characters.includes("Information")),
+        );
+
+        if (titleNode) {
+          // Load font for title
+          const titleWeightStyle = findBestStyleMatch(
+            parseInt(style.titleWeight),
+            ["Regular", "Medium", "Semi Bold", "Bold"],
+          );
+
+          await figma.loadFontAsync({
+            family: "Inter",
+            style: titleWeightStyle,
+          });
+
+          titleNode.fontName = {
+            family: "Inter",
+            style: titleWeightStyle,
+          };
+
+          titleNode.fontSize = parseInt(style.titleSize);
+          titleNode.fills = [
+            {
+              type: "SOLID",
+              color: validateAndConvertColor(style.title),
+            },
+          ];
+
+          // Update title text
+          titleNode.characters = style.titleText;
+
+          // Handle letter spacing
+          let titleLetterSpacing = 0;
+          if (style.titleLetterSpacing !== "normal") {
+            titleLetterSpacing =
+              parseFloat(style.titleLetterSpacing.replace("px", "")) || 0;
+          }
+          titleNode.letterSpacing = {
+            value: titleLetterSpacing,
+            unit: "PIXELS",
+          };
+        }
+
+        // Update message
+        const messageNode = content.findChild(
+          (node) =>
+            node.type === "TEXT" &&
+            !node.characters.includes("Notification") &&
+            !node.characters.includes("Success") &&
+            !node.characters.includes("Error") &&
+            !node.characters.includes("Warning") &&
+            !node.characters.includes("Information"),
+        );
+
+        if (messageNode) {
+          // Load font for message
+          const messageWeightStyle = findBestStyleMatch(
+            parseInt(style.messageWeight),
+            ["Regular", "Medium", "Semi Bold", "Bold"],
+          );
+
+          await figma.loadFontAsync({
+            family: "Inter",
+            style: messageWeightStyle,
+          });
+
+          messageNode.fontName = {
+            family: "Inter",
+            style: messageWeightStyle,
+          };
+
+          messageNode.fontSize = parseInt(style.messageSize);
+          messageNode.fills = [
+            {
+              type: "SOLID",
+              color: validateAndConvertColor(style.text),
+            },
+          ];
+          messageNode.characters = style.message;
+
+          // Handle letter spacing
+          let messageLetterSpacing = 0;
+          if (style.messageLetterSpacing !== "normal") {
+            messageLetterSpacing =
+              parseFloat(style.messageLetterSpacing.replace("px", "")) || 0;
+          }
+          messageNode.letterSpacing = {
+            value: messageLetterSpacing,
+            unit: "PIXELS",
+          };
+        }
+      }
+
+      // Recalculate frame heights based on content
+      if (content) {
+        const totalHeight =
+          parseInt(style.paddingY) * 2 +
+          parseInt(style.titleSize) +
+          parseInt(style.messageSize) +
+          content.itemSpacing;
+        frame.resize(frame.width, totalHeight);
+
+        // Update border height
+        if (border) {
+          border.resize(
+            border.width,
+            totalHeight - parseInt(style.paddingY) * 2,
+          );
+        }
+      }
+    } catch (error) {
+      console.error(`Error updating ${frame.name}:`, error);
+    }
+  }
+}
