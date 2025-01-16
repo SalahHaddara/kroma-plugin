@@ -1507,3 +1507,62 @@ async function createSvgNode(svgString, size) {
     return placeholder;
   }
 }
+
+function createIconsSection() {
+  const section = figma.createFrame();
+  section.name = "Icons";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 24;
+  section.fills = [];
+
+  // Create title
+  const title = figma.createText();
+  title.characters = "Icons";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  // Create grid container for icons
+  const grid = figma.createFrame();
+  grid.name = "Icon Grid";
+  grid.layoutMode = "VERTICAL";
+  grid.itemSpacing = 16;
+  grid.fills = [];
+  grid.resize(400, 250);
+
+  // Create rows with different icon sizes
+  const sizes = [16, 24, 32];
+
+  sizes.forEach((size) => {
+    // Create row container
+    const row = figma.createFrame();
+    row.name = `${size}px Icons`;
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 24;
+    row.fills = [];
+    row.resize(400, size + 32); // Add padding
+    row.counterAxisAlignItems = "CENTER";
+
+    // Create size label
+    const label = figma.createText();
+    label.characters = `${size}px`;
+    label.fontSize = 14;
+    label.fills = [{ type: "SOLID", color: { r: 0.4, g: 0.4, b: 0.4 } }];
+    row.appendChild(label);
+
+    // Create icon placeholders
+    for (let i = 0; i < 6; i++) {
+      const iconFrame = figma.createFrame();
+      iconFrame.name = `Icon ${i + 1}`;
+      iconFrame.resize(size, size);
+      iconFrame.fills = [{ type: "SOLID", color: { r: 0.9, g: 0.9, b: 0.9 } }];
+      iconFrame.cornerRadius = 4;
+      row.appendChild(iconFrame);
+    }
+
+    grid.appendChild(row);
+  });
+
+  section.appendChild(grid);
+  return section;
+}
