@@ -1160,3 +1160,141 @@ async function updateSpacingSection(section, spacingTokens) {
     section.appendChild(row);
   });
 }
+
+function createAlertsSection() {
+  const section = figma.createFrame();
+  section.name = "Alerts and Notifications";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 24;
+  section.fills = [];
+
+  const title = figma.createText();
+  title.characters = "Alerts and Notifications";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  const createNotification = (config, index) => {
+    // Create alert container
+    const alertFrame = figma.createFrame();
+    alertFrame.name = `Alert ${index + 1}`;
+    alertFrame.layoutMode = "HORIZONTAL";
+    alertFrame.itemSpacing = 12;
+    alertFrame.resize(380, 80);
+    alertFrame.paddingTop = parseInt(config.paddingY);
+    alertFrame.paddingBottom = parseInt(config.paddingY);
+    alertFrame.paddingLeft = parseInt(config.paddingX);
+    alertFrame.paddingRight = parseInt(config.paddingX);
+    alertFrame.cornerRadius = parseInt(config.borderRadius);
+    alertFrame.fills = [
+      {
+        type: "SOLID",
+        color: validateAndConvertColor(config.background),
+      },
+    ];
+
+    // Create left border
+    const border = figma.createRectangle();
+    border.resize(parseInt(config.borderWidth), 48);
+    border.cornerRadius = parseInt(config.borderWidth) / 2;
+    border.fills = [
+      {
+        type: "SOLID",
+        color: validateAndConvertColor(config.border),
+      },
+    ];
+
+    // Create content container
+    const content = figma.createFrame();
+    content.name = "Content";
+    content.layoutMode = "VERTICAL";
+    content.itemSpacing = 4;
+    content.fills = [];
+    content.resize(300, 48);
+
+    // Create alert title
+    const alertTitle = figma.createText();
+    alertTitle.characters = config.titleText || `Notification ${index + 1}`;
+    alertTitle.fontSize = parseInt(config.titleSize);
+    alertTitle.fontName = {
+      family: "Inter",
+      style: findBestStyleMatch(parseInt(config.titleWeight), [
+        "Regular",
+        "Medium",
+        "Semi Bold",
+        "Bold",
+      ]),
+    };
+    alertTitle.letterSpacing = {
+      value: parseFloat(config.titleLetterSpacing),
+      unit: "PIXELS",
+    };
+    alertTitle.fills = [
+      {
+        type: "SOLID",
+        color: validateAndConvertColor(config.title),
+      },
+    ];
+
+    // Create message
+    const message = figma.createText();
+    message.characters = config.message || `Notification message ${index + 1}`;
+    message.fontSize = parseInt(config.messageSize);
+    message.fontName = {
+      family: "Inter",
+      style: findBestStyleMatch(parseInt(config.messageWeight), [
+        "Regular",
+        "Medium",
+        "Semi Bold",
+        "Bold",
+      ]),
+    };
+    message.letterSpacing = {
+      value: parseFloat(config.messageLetterSpacing),
+      unit: "PIXELS",
+    };
+    message.fills = [
+      {
+        type: "SOLID",
+        color: validateAndConvertColor(config.text),
+      },
+    ];
+
+    content.appendChild(alertTitle);
+    content.appendChild(message);
+
+    alertFrame.appendChild(border);
+    alertFrame.appendChild(content);
+
+    return alertFrame;
+  };
+
+  // Create default notifications (will be updated later)
+  const defaultConfig = {
+    background: "#F0FDF4",
+    border: "#10B981",
+    title: "#047857",
+    text: "#065F46",
+    titleText: "Notification Title",
+    message: "Notification message",
+    icon: "#10B981",
+    borderRadius: "8px",
+    paddingX: "16px",
+    paddingY: "16px",
+    titleSize: "16px",
+    titleWeight: "600",
+    titleLetterSpacing: "0px",
+    messageSize: "14px",
+    messageWeight: "400",
+    messageLetterSpacing: "0px",
+    borderWidth: "4px",
+    iconSize: "20px",
+  };
+
+  for (let i = 0; i < 4; i++) {
+    const alert = createNotification(defaultConfig, i);
+    section.appendChild(alert);
+  }
+
+  return section;
+}
