@@ -111,6 +111,11 @@
   let authToken = null;
   const sessionKey = Math.random().toString(36).substr(2, 9);
 
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+
 
 </script>
 </body>
