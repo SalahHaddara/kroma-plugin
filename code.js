@@ -1689,3 +1689,111 @@ async function createQuoteSection() {
 
   return section;
 }
+
+async function updateQuoteSection(section, quoteData) {
+  if (!section || !quoteData) {
+    console.error("Missing section or quote data");
+    return;
+  }
+
+  try {
+    // Find the quote frame
+    const quoteFrame = section.findOne(
+      (node) => node.type === "FRAME" && node.name === "Quote",
+    );
+    if (!quoteFrame) {
+      console.error("Quote frame not found");
+      return;
+    }
+
+    // Update frame styles if provided
+    if (quoteData.styles) {
+      if (quoteData.styles.backgroundColor) {
+        quoteFrame.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(quoteData.styles.backgroundColor),
+          },
+        ];
+      }
+      if (quoteData.styles.cornerRadius) {
+        quoteFrame.cornerRadius = parseInt(quoteData.styles.cornerRadius);
+      }
+      if (quoteData.styles.padding) {
+        quoteFrame.paddingLeft = parseInt(quoteData.styles.padding);
+        quoteFrame.paddingRight = parseInt(quoteData.styles.padding);
+        quoteFrame.paddingTop = parseInt(quoteData.styles.padding);
+        quoteFrame.paddingBottom = parseInt(quoteData.styles.padding);
+      }
+    }
+
+    // Find and update the quote symbol
+    const quoteSymbol = quoteFrame.findOne(
+      (node) => node.type === "TEXT" && node.characters === '"',
+    );
+    if (quoteSymbol && quoteData.quoteSymbol) {
+      await figma.loadFontAsync(quoteSymbol.fontName);
+      if (quoteData.quoteSymbol.color) {
+        quoteSymbol.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(quoteData.quoteSymbol.color),
+          },
+        ];
+      }
+      if (quoteData.quoteSymbol.fontSize) {
+        quoteSymbol.fontSize = parseInt(quoteData.quoteSymbol.fontSize);
+      }
+    }
+
+    // Find and update the quote text
+    const quoteText = quoteFrame.findOne(
+      (node) =>
+        node.type === "TEXT" &&
+        !node.characters.startsWith("—") &&
+        node.characters !== '"',
+    );
+    if (quoteText && quoteData.quote) {
+      await figma.loadFontAsync(quoteText.fontName);
+      quoteText.characters = quoteData.quote.text || quoteText.characters;
+
+      if (quoteData.quote.color) {
+        quoteText.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(quoteData.quote.color),
+          },
+        ];
+      }
+      if (quoteData.quote.fontSize) {
+        quoteText.fontSize = parseInt(quoteData.quote.fontSize);
+      }
+    }
+
+    // Find and update the author text
+    const authorText = quoteFrame.findOne(
+      (node) => node.type === "TEXT" && node.characters.startsWith("—"),
+    );
+    if (authorText && quoteData.author) {
+      await figma.loadFontAsync(authorText.fontName);
+      authorText.characters = `— ${quoteData.author.name}`;
+
+      if (quoteData.author.color) {
+        authorText.fills = [
+          {
+            type: "SOLID",
+            color: validateAndConvertColor(quoteData.author.color),
+          },
+        ];
+      }
+      if (quoteData.author.fontSize) {
+        authorText.fontSize = parseInt(quoteData.author.fontSize);
+      }
+    }
+
+    // Force a repaint of the frame
+    quoteFrame.resize(quoteFrame.width, quoteFrame.height);
+  } catch (error) {
+    console.error("Error updating quote section:", error);
+  }
+}
