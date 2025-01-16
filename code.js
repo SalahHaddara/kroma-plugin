@@ -129,3 +129,32 @@ function validateAndConvertColor(color) {
   console.warn(`Invalid color value: ${color}, defaulting to black`);
   return { r: 0, g: 0, b: 0 };
 }
+
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
+    throw new Error(`Invalid hex color: ${hex}`);
+  }
+
+  hex = hex.replace("#", "");
+
+  if (hex.length === 3) {
+    hex = hex
+      .split("")
+      .map((char) => char + char)
+      .join("");
+  }
+
+  if (hex.length !== 6) {
+    throw new Error(`Invalid hex length: ${hex}`);
+  }
+
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    throw new Error(`Invalid hex values: ${hex}`);
+  }
+
+  return { r, g, b };
+}
