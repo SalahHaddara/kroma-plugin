@@ -1472,3 +1472,38 @@ async function updateAlerts(section, alertsConfig) {
     }
   }
 }
+
+async function createSvgNode(svgString, size) {
+  try {
+    // Create a node using the SVG data
+    const node = figma.createNodeFromSvg(svgString);
+
+    // Resize to desired dimensions while maintaining aspect ratio
+    const scale = size / Math.max(node.width, node.height);
+    node.resize(node.width * scale, node.height * scale);
+
+    // Center if not square
+    if (node.width !== node.height) {
+      const frame = figma.createFrame();
+      frame.resize(size, size);
+      frame.fills = [];
+      frame.appendChild(node);
+
+      // Center the SVG in the frame
+      node.x = (size - node.width) / 2;
+      node.y = (size - node.height) / 2;
+
+      return frame;
+    }
+
+    return node;
+  } catch (error) {
+    console.error("Error creating SVG node:", error);
+    // Create a fallback placeholder
+    const placeholder = figma.createFrame();
+    placeholder.resize(size, size);
+    placeholder.fills = [{ type: "SOLID", color: { r: 0.9, g: 0.9, b: 0.9 } }];
+    placeholder.cornerRadius = 4;
+    return placeholder;
+  }
+}
