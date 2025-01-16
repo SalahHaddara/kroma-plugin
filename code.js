@@ -238,3 +238,80 @@ async function loadFonts(fontFamily) {
     throw error;
   }
 }
+
+async function updateColorPalette(section, colors) {
+  if (!section || !colors || !Array.isArray(colors)) {
+    console.error("Invalid section or colors array");
+    return;
+  }
+
+  try {
+    const colorRows = section.findAll(
+      (node) => node.type === "FRAME" && node.layoutMode === "HORIZONTAL",
+    );
+
+    if (!colorRows || colorRows.length === 0) {
+      console.error("No color rows found in section");
+      return;
+    }
+
+    colors.forEach((palette, index) => {
+      if (!Array.isArray(palette)) {
+        console.error(`Invalid palette format at index ${index}`);
+        return;
+      }
+
+      if (index >= colorRows.length) {
+        console.warn(`No row found for palette ${index}`);
+        return;
+      }
+
+      const row = colorRows[index];
+
+      const swatches = row.findAll((node) => node.type === "RECTANGLE");
+
+      if (!swatches || swatches.length === 0) {
+        console.error(`No swatches found in row ${index}`);
+        return;
+      }
+
+      // Update each swatch with its new color
+      palette.forEach((color, swatchIndex) => {
+        if (swatchIndex >= swatches.length) {
+          console.warn(
+            `No swatch found for color ${swatchIndex} in palette ${index}`,
+          );
+          return;
+        }
+
+        try {
+          // Ensure the color is in the correct format
+          if (typeof color !== "string" || !color.startsWith("#")) {
+            console.error(`Invalid color format: ${color}`);
+            return;
+          }
+
+          // Convert and apply the color
+          const rgbColor = hexToRgb(color);
+          swatches[swatchIndex].fills = [
+            {
+              type: "SOLID",
+              color: rgbColor,
+            },
+          ];
+
+          console.log(
+            `Updated swatch ${swatchIndex} in palette ${index} with color ${color}`,
+          );
+        } catch (error) {
+          console.error(
+            `Error updating swatch ${swatchIndex} in palette ${index}:`,
+            error,
+          );
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Error in updateColorPalette:", error);
+  }
+}
