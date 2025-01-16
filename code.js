@@ -1917,3 +1917,21 @@ async function updateInspirationSection(section, imageTokens) {
     console.error("Error updating inspiration images:", error);
   }
 }
+
+async function exportFrameToPNG(frame) {
+  try {
+    const bytes = await frame.exportAsync({
+      format: "PNG",
+      constraint: { type: "SCALE", value: 2 },
+    });
+
+    // Send PNG content
+    figma.ui.postMessage({
+      type: "generation-complete",
+      imageBytes: Array.from(bytes),
+    });
+  } catch (error) {
+    console.error("Error exporting PNG:", error);
+    throw error;
+  }
+}
