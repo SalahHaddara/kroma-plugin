@@ -1060,3 +1060,55 @@ function createTypographySection() {
 
   return section;
 }
+
+function createSpacingSection() {
+  const section = figma.createFrame();
+  section.name = "Spacing System";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 24;
+  section.fills = [];
+
+  const title = figma.createText();
+  title.characters = "Spacing System";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  // Define default spacing values
+  const spacings = [
+    { name: "Micro", size: 4 },
+    { name: "XS", size: 8 },
+    { name: "SM", size: 12 },
+    { name: "Base", size: 16 },
+    { name: "MD", size: 24 },
+    { name: "LG", size: 32 },
+    { name: "XL", size: 48 },
+    { name: "2XL", size: 64 },
+  ];
+
+  spacings.forEach((spacing) => {
+    const row = figma.createFrame();
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 12;
+    row.fills = [];
+    row.resize(380, 24);
+    row.counterAxisAlignItems = "CENTER";
+
+    const line = figma.createLine();
+    line.strokeWeight = 2;
+    line.strokeCap = "ROUND";
+    line.strokes = [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }];
+    line.resize(spacing.size, 0);
+
+    const label = figma.createText();
+    label.characters = `${spacing.size}px - ${spacing.name}`;
+    label.fontSize = 14;
+    label.fills = [{ type: "SOLID", color: { r: 0.4, g: 0.4, b: 0.4 } }];
+
+    row.appendChild(line);
+    row.appendChild(label);
+    section.appendChild(row);
+  });
+
+  return section;
+}
