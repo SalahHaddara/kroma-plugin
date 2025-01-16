@@ -224,7 +224,22 @@
           });
         break;
 
+      case 'generation-complete':
+        if (event.data.pluginMessage.imageBytes) {
+          const formData = new FormData();
+          const bytes = new Uint8Array(event.data.pluginMessage.imageBytes);
+          const blob = new Blob([bytes], { type: 'image/png' });
+          formData.append('design', blob, 'design.png');
 
+          fetch(`${WEBSITE_URL}/get-design/save-design`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+            },
+            body: formData,
+          });
+        }
+        break;
     }
   };
 </script>
