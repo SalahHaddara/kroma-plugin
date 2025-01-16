@@ -170,3 +170,16 @@ const fontWeightMap = {
   800: ["ExtraBold", "Extra Bold", "Ultra Bold"],
   900: ["Black", "Heavy"],
 };
+
+async function getAvailableFontStyles(fontFamily) {
+  try {
+    const fonts = await figma.listAvailableFontsAsync();
+    const familyFonts = fonts.filter(
+      (font) => font.fontName.family === fontFamily,
+    );
+    return familyFonts.map((font) => font.fontName.style);
+  } catch (error) {
+    console.error(`Error getting fonts for ${fontFamily}:`, error);
+    return [];
+  }
+}
