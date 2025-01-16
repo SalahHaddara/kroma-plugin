@@ -446,3 +446,128 @@ async function updateDesignTokens(tokens) {
     throw error;
   }
 }
+
+async function updateTypography(section, typography, fontInfo) {
+  try {
+    if (!section || !typography) {
+      console.warn("Missing required parameters in updateTypography");
+      return;
+    }
+
+    if (!typography.sizes || typeof typography.sizes !== "object") {
+      console.error("Invalid or missing typography sizes");
+      return;
+    }
+
+    const validatedSizes = {
+      h1: parseInt(typography.sizes.h1) || 60,
+      h2: parseInt(typography.sizes.h2) || 48,
+      h3: parseInt(typography.sizes.h3) || 40,
+      paragraph: parseInt(typography.sizes.paragraph) || 20,
+      caption: parseInt(typography.sizes.caption) || 16,
+    };
+
+    const fontsToLoad = new Set();
+
+    // Add the regular, medium, and bold variants of the font family
+    if (typography.fontFamily) {
+      fontsToLoad.add({
+        family: typography.fontFamily,
+        style: fontInfo.styles.regular,
+      });
+      fontsToLoad.add({
+        family: typography.fontFamily,
+        style: fontInfo.styles.medium,
+      });
+      fontsToLoad.add({
+        family: typography.fontFamily,
+        style: fontInfo.styles.bold,
+      });
+    }
+
+    // Load all fonts first
+    await Promise.all(
+      Array.from(fontsToLoad).map((font) => figma.loadFontAsync(font)),
+    );
+
+    // Get all text nodes
+    const textNodes = section.findAll((node) => node.type === "TEXT");
+
+    // Update each text node
+    for (const node of textNodes) {
+      if (typography.fontFamily) {
+        // Determine the appropriate style based on current font weight
+        let style = fontInfo.styles.regular;
+        const currentStyle = node.fontName.style.toLowerCase();
+
+        if (currentStyle.includes("bold") || currentStyle.includes("700")) {
+          style = fontInfo.styles.bold;
+        } else if (
+          currentStyle.includes("medium") ||
+          currentStyle.includes("500")
+        ) {
+          style = fontInfo.styles.medium;
+        }
+
+        // Set the font family and style
+        node.fontName = {
+          family: typography.fontFamily,
+          style: style,
+        };
+      }
+
+      // Update font sizes if provided
+      let newSize = null;
+
+      // Determine the appropriate size based on node name or content
+      if (
+        node.name.includes("H1") ||
+        node.characters.startsWith("This is H1")
+      ) {
+        newSize = validatedSizes.h1;
+      } else if (
+        node.name.includes("H2") ||
+        node.characters.startsWith("This is H2")
+      ) {
+        newSize = validatedSizes.h2;
+      } else if (
+        node.name.includes("H3") ||
+        node.characters.startsWith("This is H3")
+      ) {
+        newSize = validatedSizes.h3;
+      } else if (
+        node.name.includes("Paragraph") ||
+        node.characters.startsWith("This is Paragraph")
+      ) {
+        newSize = validatedSizes.paragraph;
+      } else if (
+        node.name.includes("Caption") ||
+        node.characters.startsWith("THIS IS CAPTION")
+      ) {
+        newSize = validatedSizes.caption;
+      }
+
+      // Apply new size if determined
+      if (typeof newSize === "number" && newSize > 0) {
+        node.fontSize = newSize;
+
+        // Update the size in details text if this is a heading
+        const parentFrame = node.parent;
+        if (parentFrame && parentFrame.type === "FRAME") {
+          const detailsText = parentFrame.findOne(
+            (n) => n.type === "TEXT" && n.characters.includes("Typeface"),
+          );
+
+          if (detailsText) {
+            // Ensure font is loaded before updating details text
+            await figma.loadFontAsync(detailsText.fontName);
+            detailsText.characters = `${typography.fontFamily} Typeface\nSize: ${newSize}px`;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error in updateTypography:", error);
+    throw error;
+  }
+}
