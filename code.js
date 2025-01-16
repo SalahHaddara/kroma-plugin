@@ -208,3 +208,33 @@ function findBestStyleMatch(targetWeight, availableStyles) {
 
   return availableStyles.includes("Regular") ? "Regular" : availableStyles[0];
 }
+
+async function loadFonts(fontFamily) {
+  try {
+    const availableStyles = await getAvailableFontStyles(fontFamily);
+
+    if (availableStyles.length === 0) {
+      throw new Error(`No styles found for font ${fontFamily}`);
+    }
+
+    const requiredWeights = [400, 500, 700];
+
+    for (const weight of requiredWeights) {
+      const style = findBestStyleMatch(weight, availableStyles);
+      await figma.loadFontAsync({ family: fontFamily, style: style });
+      console.log(`Loaded ${fontFamily} ${style}`);
+    }
+
+    return {
+      family: fontFamily,
+      styles: {
+        regular: findBestStyleMatch(400, availableStyles),
+        medium: findBestStyleMatch(500, availableStyles),
+        bold: findBestStyleMatch(700, availableStyles),
+      },
+    };
+  } catch (error) {
+    console.error(`Error loading font ${fontFamily}:`, error);
+    throw error;
+  }
+}
