@@ -711,3 +711,119 @@ async function updateButtons(section, buttonStyles, fontInfo) {
     }
   }
 }
+
+async function createDesignSystem() {
+  try {
+    // Load fonts first
+    await Promise.all([
+      figma.loadFontAsync({ family: "Inter", style: "Regular" }),
+      figma.loadFontAsync({ family: "Inter", style: "Medium" }),
+      figma.loadFontAsync({ family: "Inter", style: "Semi Bold" }),
+    ]).catch((error) => {
+      console.error("Error loading fonts:", error);
+      throw new Error("Failed to load required fonts");
+    });
+
+    // Create main frame
+    const frame = figma.createFrame();
+    frame.x = 0;
+    frame.y = 0;
+    frame.name = "Design System";
+    frame.resize(2200, 1030); // Wider frame to accommodate larger sections
+    frame.fills = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }];
+
+    // Create sections with error handling
+    const defaultSectionWidth = 400;
+
+    // Create sections asynchronously
+    const sections = [
+      {
+        name: "Color Palette",
+        creator: createColorPaletteSection,
+        x: 40,
+        y: 40,
+        width: defaultSectionWidth,
+      },
+      {
+        name: "Buttons",
+        creator: createButtonsSection,
+        x: 520,
+        y: 40,
+        width: 200,
+      },
+      {
+        name: "Typography System",
+        creator: createTypographySection,
+        x: 40,
+        y: 400,
+        width: 470,
+      },
+      {
+        name: "Spacing System",
+        creator: createSpacingSection,
+        x: 520,
+        y: 600,
+        width: 220,
+      },
+      {
+        name: "Icons",
+        creator: createIconsSection,
+        x: 800,
+        y: 40,
+        width: defaultSectionWidth,
+      },
+      {
+        name: "Quotes",
+        creator: createQuoteSection,
+        x: 800,
+        y: 300,
+        width: defaultSectionWidth,
+      },
+      {
+        name: "Alerts",
+        creator: createAlertsSection,
+        x: 800,
+        y: 550,
+        width: defaultSectionWidth,
+      },
+      {
+        name: "Inspiration Images",
+        creator: createInspirationSection,
+        x: 1300,
+        y: 40,
+        width: 800, // Set specific width for inspiration section
+      },
+    ];
+
+    // Create and position each section
+    for (const section of sections) {
+      try {
+        console.log(`Creating section: ${section.name}`);
+        const sectionNode = await section.creator();
+
+        if (sectionNode) {
+          // Only resize width if the section isn't 'Inspiration Images'
+          sectionNode.resize(section.width, sectionNode.height);
+          sectionNode.x = section.x;
+          sectionNode.y = section.y;
+          frame.appendChild(sectionNode);
+          console.log(`Successfully created section: ${section.name}`);
+        } else {
+          console.warn(`Section creator returned null for: ${section.name}`);
+        }
+      } catch (error) {
+        console.error(`Error creating section ${section.name}:`, error);
+        // Continue with next section instead of failing completely
+      }
+    }
+
+    // Select and zoom to frame
+    figma.currentPage.selection = [frame];
+    figma.viewport.scrollAndZoomIntoView([frame]);
+
+    return frame;
+  } catch (error) {
+    console.error("Error in createDesignSystem:", error);
+    throw error;
+  }
+}
