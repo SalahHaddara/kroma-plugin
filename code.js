@@ -1112,3 +1112,51 @@ function createSpacingSection() {
 
   return section;
 }
+
+async function updateSpacingSection(section, spacingTokens) {
+  if (!section || !spacingTokens) return;
+
+  // Get the title element
+  const title = section.findOne(
+    (node) => node.type === "TEXT" && node.characters === "Spacing System",
+  );
+
+  // Remove all other elements except title
+  section.children.forEach((child) => {
+    if (child !== title) {
+      child.remove();
+    }
+  });
+
+  // Create new spacing examples
+  const spacings = [];
+  for (const [name, size] of Object.entries(spacingTokens)) {
+    spacings.push({ name: name, size: size });
+  }
+
+  spacings.sort((a, b) => a.size - b.size); // Sort by size
+
+  spacings.forEach((spacing) => {
+    const row = figma.createFrame();
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 12;
+    row.fills = [];
+    row.resize(380, 24);
+    row.counterAxisAlignItems = "CENTER";
+
+    const line = figma.createLine();
+    line.strokeWeight = 2;
+    line.strokeCap = "ROUND";
+    line.strokes = [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }];
+    line.resize(spacing.size, 0);
+
+    const label = figma.createText();
+    label.characters = `${spacing.size}px - ${spacing.name}`;
+    label.fontSize = 14;
+    label.fills = [{ type: "SOLID", color: { r: 0.4, g: 0.4, b: 0.4 } }];
+
+    row.appendChild(line);
+    row.appendChild(label);
+    section.appendChild(row);
+  });
+}
