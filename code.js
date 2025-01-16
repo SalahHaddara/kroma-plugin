@@ -827,3 +827,70 @@ async function createDesignSystem() {
     throw error;
   }
 }
+
+function createColorPaletteSection() {
+  const section = figma.createFrame();
+  section.name = "Color Palette";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 24;
+  section.fills = [];
+
+  const title = figma.createText();
+  title.characters = "Color Palette";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  // Color rows
+  const colors = [
+    // Purple palette
+    [
+      "#F4F1FF",
+      "#D9D3FF",
+      "#BFB3FF",
+      "#9980FF",
+      "#6666E6",
+      "#4D4DB3",
+      "#333380",
+    ],
+    // Green palette
+    [
+      "#CCFF4D",
+      "#B3E635",
+      "#99CC1A",
+      "#80B300",
+      "#668000",
+      "#4D6600",
+      "#334D00",
+    ],
+    // Gray palette
+    [
+      "#F2F2F2",
+      "#D9D9D9",
+      "#BFBFBF",
+      "#A6A6A6",
+      "#737373",
+      "#404040",
+      "#1A1A1A",
+    ],
+  ];
+
+  colors.forEach((palette) => {
+    const row = figma.createFrame();
+    row.resize(350, 50);
+    row.layoutMode = "HORIZONTAL";
+    row.itemSpacing = 0;
+    row.fills = [];
+
+    palette.forEach((color) => {
+      const swatch = figma.createRectangle();
+      swatch.resize(50, 50); // Fixed width for each swatch
+      swatch.fills = [{ type: "SOLID", color: hexToRgb(color) }];
+      row.appendChild(swatch);
+    });
+
+    section.appendChild(row);
+  });
+
+  return section;
+}
