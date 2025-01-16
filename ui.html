@@ -173,6 +173,25 @@
     }
   };
 
+  document.getElementById('generateDesign').onclick = async () => {
+    if (!authToken) {
+      showScreen('loginScreen');
+      return;
+    }
+
+    const button = document.getElementById('generateDesign');
+    button.disabled = true;
+    button.textContent = 'Generating...';
+
+    try {
+      parent.postMessage({ pluginMessage: { type: 'generate-design-system' } }, '*');
+    } catch (error) {
+      console.error('Generation failed:', error);
+      button.disabled = false;
+      button.textContent = 'Generate Design System';
+    }
+  };
+
 
 </script>
 </body>
