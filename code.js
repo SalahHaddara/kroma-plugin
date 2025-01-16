@@ -46,3 +46,86 @@ figma.ui.onmessage = async (msg) => {
     });
   }
 };
+
+function validateAndConvertColor(color) {
+  console.log("Converting color:", color);
+
+  // If it's already an RGB object
+  if (
+    typeof color === "object" &&
+    color !== null &&
+    typeof color.r === "number" &&
+    typeof color.g === "number" &&
+    typeof color.b === "number"
+  ) {
+    return color;
+  }
+
+  // If it's a string, handle different formats
+  if (typeof color === "string") {
+    // Handle hex format
+    if (color.startsWith("#")) {
+      const r = parseInt(color.slice(1, 3), 16) / 255;
+      const g = parseInt(color.slice(3, 5), 16) / 255;
+      const b = parseInt(color.slice(5, 7), 16) / 255;
+
+      if (isNaN(r) || isNaN(g) || isNaN(b)) {
+        throw new Error(`Invalid hex color format: ${color}`);
+      }
+
+      return { r, g, b };
+    }
+
+    // Handle rgba format
+    if (color.startsWith("rgba")) {
+      const values = color.match(
+        /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d*\.?\d+))?\)/,
+      );
+      if (values) {
+        const r = parseInt(values[1]) / 255;
+        const g = parseInt(values[2]) / 255;
+        const b = parseInt(values[3]) / 255;
+
+        if (isNaN(r) || isNaN(g) || isNaN(b)) {
+          throw new Error(`Invalid rgba color format: ${color}`);
+        }
+
+        return { r, g, b };
+      }
+    }
+
+    // Handle rgb format
+    if (color.startsWith("rgb")) {
+      const values = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (values) {
+        const r = parseInt(values[1]) / 255;
+        const g = parseInt(values[2]) / 255;
+        const b = parseInt(values[3]) / 255;
+
+        if (isNaN(r) || isNaN(g) || isNaN(b)) {
+          throw new Error(`Invalid rgb color format: ${color}`);
+        }
+
+        return { r, g, b };
+      }
+    }
+
+    // Handle color keywords
+    const colorKeywords = {
+      black: { r: 0, g: 0, b: 0 },
+      white: { r: 1, g: 1, b: 1 },
+      red: { r: 1, g: 0, b: 0 },
+      green: { r: 0, g: 1, b: 0 },
+      blue: { r: 0, g: 0, b: 1 },
+      transparent: { r: 0, g: 0, b: 0, a: 0 },
+    };
+
+    if (colorKeywords[color.toLowerCase()]) {
+      return colorKeywords[color.toLowerCase()];
+    }
+  }
+
+  // Default to black if color is invalid
+  console.warn(`Invalid color value: ${color}, defaulting to black`);
+  return { r: 0, g: 0, b: 0 };
+}
