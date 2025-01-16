@@ -1566,3 +1566,59 @@ function createIconsSection() {
   section.appendChild(grid);
   return section;
 }
+
+async function updateIconsSection(section, iconTokens) {
+  if (!section || !iconTokens) return;
+
+  const rows = section.findAll(
+    (node) => node.type === "FRAME" && node.name.includes("px Icons"),
+  );
+
+  for (const row of rows) {
+    const size = parseInt(row.name);
+    const icons = row.findAll((node) => node.name.startsWith("Icon "));
+
+    for (const [index, icon] of icons.entries()) {
+      const tokenKey = `icon${index + 1}`;
+      const style = iconTokens[tokenKey];
+
+      if (style && style.svg) {
+        try {
+          // Remove existing icon content
+          const existingIcon = icon.findChild(
+            (n) => n.type === "VECTOR" || n.type === "FRAME",
+          );
+          if (existingIcon) {
+            existingIcon.remove();
+          }
+
+          // Create new SVG node
+          const svgNode = await createSvgNode(style.svg, size);
+
+          // If the icon is a frame (placeholder), replace it
+          if (icon.type === "FRAME") {
+            const parent = icon.parent;
+            const index = parent.children.indexOf(icon);
+            icon.remove();
+            parent.insertChild(index, svgNode);
+          }
+
+          // Apply color if specified
+          if (style.color) {
+            const vectors = svgNode.findAll((node) => node.type === "VECTOR");
+            vectors.forEach((vector) => {
+              vector.fills = [
+                {
+                  type: "SOLID",
+                  color: validateAndConvertColor(style.color),
+                },
+              ];
+            });
+          }
+        } catch (error) {
+          console.error(`Error updating icon ${tokenKey}:`, error);
+        }
+      }
+    }
+  }
+}
