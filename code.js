@@ -1797,3 +1797,50 @@ async function updateQuoteSection(section, quoteData) {
     console.error("Error updating quote section:", error);
   }
 }
+
+async function createInspirationSection() {
+  const section = figma.createFrame();
+  section.name = "Inspiration Images";
+  section.layoutMode = "VERTICAL";
+  section.itemSpacing = 24;
+  section.fills = [];
+  section.resize(800, 824); // Increased size to accommodate larger images
+
+  // Create title
+  const title = figma.createText();
+  title.characters = "Inspiration Images";
+  title.fontSize = 16;
+  title.fontName = { family: "Inter", style: "Semi Bold" };
+  section.appendChild(title);
+
+  // Create main image container
+  const mainImageContainer = figma.createFrame();
+  mainImageContainer.name = "Main Image";
+  mainImageContainer.resize(800, 400);
+  mainImageContainer.fills = [
+    { type: "SOLID", color: { r: 0.95, g: 0.95, b: 0.95 } },
+  ];
+  section.appendChild(mainImageContainer);
+
+  // Create container for smaller images
+  const smallImagesContainer = figma.createFrame();
+  smallImagesContainer.name = "Small Images Container";
+  smallImagesContainer.layoutMode = "HORIZONTAL";
+  smallImagesContainer.itemSpacing = 16;
+  smallImagesContainer.resize(800, 400);
+  smallImagesContainer.fills = [];
+
+  // Create two smaller image frames
+  for (let i = 1; i <= 2; i++) {
+    const smallImage = figma.createFrame();
+    smallImage.name = `Small Image ${i}`;
+    smallImage.resize(392, 400); // (800 - 16) / 2 = 392 width accounting for spacing
+    smallImage.fills = [
+      { type: "SOLID", color: { r: 0.95, g: 0.95, b: 0.95 } },
+    ];
+    smallImagesContainer.appendChild(smallImage);
+  }
+
+  section.appendChild(smallImagesContainer);
+  return section;
+}
