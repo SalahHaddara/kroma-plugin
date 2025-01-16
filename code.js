@@ -158,3 +158,15 @@ function hexToRgb(hex) {
 
   return { r, g, b };
 }
+
+const fontWeightMap = {
+  100: ["Thin", "Hairline", "ExtraLight", "Ultra Light"],
+  200: ["ExtraLight", "Ultra Light", "Thin"],
+  300: ["Light"],
+  400: ["Regular", "Normal"],
+  500: ["Medium"],
+  600: ["SemiBold", "Semi Bold", "Demi Bold", "DemiBold"],
+  700: ["Bold"],
+  800: ["ExtraBold", "Extra Bold", "Ultra Bold"],
+  900: ["Black", "Heavy"],
+};
